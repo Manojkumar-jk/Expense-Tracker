@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Personal Dashboard</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <h1 style="font-family: 'Segoe UI', 'Arial', sans-serif; font-weight: 900; font-size: 3.5rem; color: #2b6cb0; letter-spacing: 1px; text-align: center; margin-top: 32px; margin-bottom: 28px; text-shadow: 1px 2px 8px #e6f0fa;">Personal Dashboard</h1>
+  <button id="logoutBtn" style="position: absolute; top: 24px; right: 32px; background: #e53e3e; color: #fff; border: none; border-radius: 6px; padding: 8px 18px; font-size: 1rem; cursor: pointer;">Logout</button>
+  <span id="clock" style="position: absolute; top: 28px; right: 160px; font-size: 1.1rem; color: #2d3748; font-family: monospace;"></span>
+  <div class="dashboard">
+    <!-- Daily Routine -->
+    <div class="card">
+      <h2><a href="daily-routine.html">Daily Routine</a></h2>
+      <ul class="routine-list">
+        <li><input type="checkbox" checked disabled> Wake up at 6 AM</li>
+        <li><input type="checkbox" checked disabled> Exercise for 30 mins</li>
+        <li><input type="checkbox" checked disabled> Read for 20 mins</li>
+      </ul>
+    </div>
+    <!-- Expenses This Month -->
+    <div class="card">
+      <h2><a href="expenses.html">Expenses This Month</a></h2>
+      <div class="expenses-amount">₹450</div>
+      <div class="expenses-bar">
+        <div class="expenses-bar-fill" style="width: 90%; background: #3b82f6; height: 8px; border-radius: 4px;"></div>
+      </div>
+      <div class="expenses-labels">
+        <span>0</span>
+        <span style="float:right">500</span>
+      </div>
+    </div>
+    <!-- Weather -->
+    <div class="card">
+      <h2><a href="weather.html">Weather</a></h2>
+      <div style="font-size: 40px;">⛅</div>
+      <div class="weather-temp" style="font-size: 32px;">72&deg;</div>
+      <div class="weather-location">Sunnyvale</div>
+    </div>
+    <!-- Quick Notes -->
+    <div class="card">
+      <h2><a href="notes.html">Quick Notes</a></h2>
+      <textarea placeholder="Type your note here..." rows="3" style="width: 100%;">Review for exams</textarea>
+    </div>
+    <!-- To-Do List -->
+    <div class="card">
+      <h2><a href="todo.html">To-Do List</a></h2>
+      <form class="todo-form" onsubmit="return false;">
+        <input type="text" placeholder="Enter task details" style="width: 60%;">
+        <button type="submit">Add</button>
+      </form>
+      <ul class="todo-list">
+        <li><input type="checkbox"> Finish project report</li>
+        <li><input type="checkbox" checked> Buy groceries</li>
+        <li><input type="checkbox" checked> Call John</li>
+      </ul>
+    </div>
+    <!-- Split Bills with Friends -->
+    <div class="card">
+      <h2><a href="split-bills.html">Split Bills with Friends</a></h2>
+      <form class="split-bill-form" onsubmit="return false;">
+        <input type="text" placeholder="Enter bill details" style="width: 60%;">
+        <button type="submit">Calculate</button>
+      </form>
+    </div>
+    <!-- Meal Planner -->
+    <div class="card">
+      <h2><a href="meal-planner.html">Meal Planner</a></h2>
+      <div class="meal-planner-info"></div>
+    </div>
+  </div>
+  <script src="main.js"></script>
+  <script>
+    document.getElementById('logoutBtn').addEventListener('click', async () => {
+      await fetch('/api/logout', { method: 'POST' });
+      window.location.href = 'login.html';
+    });
+    // Live clock with date
+    function updateClock() {
+      const now = new Date();
+      const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+      const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+      const dayName = days[now.getDay()];
+      const day = now.getDate();
+      const month = months[now.getMonth()];
+      const year = now.getFullYear();
+      let h = now.getHours();
+      const m = now.getMinutes().toString().padStart(2, '0');
+      const s = now.getSeconds().toString().padStart(2, '0');
+      const ampm = h >= 12 ? 'PM' : 'AM';
+      h = h % 12;
+      h = h ? h : 12;
+      const dateStr = `${dayName}, ${day} ${month} ${year}`;
+      const timeStr = `${h}:${m}:${s} ${ampm}`;
+      document.getElementById('clock').textContent = `${dateStr}, ${timeStr}`;
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+  </script>
+
+  <div style="width: 100vw; position: relative; left: 50%; right: 50%; margin-left: -50vw; margin-right: -50vw; background: #e6f0fa; padding: 48px 0 40px 0;">
+    <div class="card" style="max-width: 1200px; margin: 0 auto; background: #e6f0fa; box-shadow: none; border-radius: 18px; padding: 32px 24px;">
+      <h2 style="text-align:center; margin-bottom: 32px;">About This Project</h2>
+      <div style="display: flex; flex-wrap: wrap; gap: 32px; justify-content: space-between;">
+        <!-- Segment 1: Project Overview -->
+        <div style="flex: 1 1 200px; min-width: 220px;">
+          <h3 style="color: #3182ce;">Overview</h3>
+          <p>
+            <strong>Personal Dashboard</strong> is a productivity web app that helps you manage your daily routine, track expenses, plan meals, take notes, organize your to-do list, and split bills with friends—all in one place. It provides a simple, unified interface for your everyday needs.
+          </p>
+        </div>
+        <!-- Segment 2: Key Features -->
+        <div style="flex: 1 1 200px; min-width: 220px;">
+          <h3 style="color: #38a169;">Key Features</h3>
+          <ul style="padding-left: 18px;">
+            <li>Daily routine checklist</li>
+            <li>Monthly expense tracker</li>
+            <li>Weather updates</li>
+            <li>Quick notes</li>
+            <li>To-do list management</li>
+            <li>Bill splitting with friends</li>
+            <li>Weekly meal planner</li>
+          </ul>
+        </div>
+        <!-- Segment 3: Technologies Used -->
+        <div style="flex: 1 1 200px; min-width: 220px;">
+          <h3 style="color: #805ad5;">Technologies</h3>
+          <ul style="padding-left: 18px;">
+            <li>Node.js & Express.js</li>
+            <li>MySQL Database</li>
+            <li>HTML5 & CSS3</li>
+            <li>JavaScript (ES6+)</li>
+          </ul>
+        </div>
+        <!-- Segment 4: Purpose/Attribution -->
+        <div style="flex: 1 1 200px; min-width: 220px;">
+          <h3 style="color: #e53e3e;">Purpose</h3>
+          <p style="color: #718096; font-size: 0.98em;">
+            Created as a personal productivity tool and learning project.<br>
+            <span style="font-size: 0.95em;">&copy; 2024</span>
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html> 

@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Quick Notes</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <a href="index.html">&larr; Back to Dashboard</a>
+  <div class="card" style="max-width: 600px; margin: 40px auto;">
+    <h2>Quick Notes</h2>
+    
+    <!-- Add new note form -->
+    <form id="addNoteForm" style="margin-bottom: 20px;">
+      <textarea id="noteContent" placeholder="Type your note here..." rows="4" style="width: 100%; margin-bottom: 10px;" required></textarea>
+      <button type="submit">Save Note</button>
+    </form>
+    
+    <!-- Notes list -->
+    <div id="notesList">
+      <!-- Notes will be loaded here -->
+    </div>
+    
+    <p>Write and save your notes here.</p>
+  </div>
+
+  <script>
+    // Load notes on page load
+    loadNotes();
+
+    // Add note form handler
+    document.getElementById('addNoteForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const content = document.getElementById('noteContent').value;
+      
+      try {
+        const response = await fetch('/api/notes', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ content })
+        });
+        
+        if (response.ok) {
+          document.getElementById('noteContent').value = '';
+          loadNotes();
+        }
+      } catch (error) {
+        console.error('Error adding note:', error);
+      }
+    });
+
+    async function loadNotes() {
+      try {
+        const response = await fetch('/api/notes');
+        const data = await response.json();
+        const notesList = document.getElementById('notesList');
+        
+        notesList.innerHTML = `
+          <h3>Your Notes</h3>
+          ${data.notes.map(note => `
+            <div style="border: 1px solid #e2e8f0; border-radius: 10px; padding: 15px; margin-bottom: 15px; background: #f7fafc;">
+              <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 10px;">
+                <small style="color: #718096;">${new Date(note.created).toLocaleDateString()}</small>
+                <div>
+                  <button onclick="editNote(${note.id})" style="background: #3182ce; padding: 5px 10px; font-size: 0.8rem; margin-right: 5px;">Edit</button>
+                  <button onclick="deleteNote(${note.id})" style="background: #e53e3e; padding: 5px 10px; font-size: 0.8rem;">Delete</button>
+                </div>
+              </div>
+              <div id="note-content-${note.id}">${note.content}</div>
+              <div id="note-edit-${note.id}" style="display: none;">
+                <textarea id="edit-content-${note.id}" rows="4" style="width: 100%; margin-bottom: 10px;">${note.content}</textarea>
+                <button onclick="saveNoteEdit(${note.id})" style="background: #38a169; padding: 5px 10px; font-size: 0.8rem; margin-right: 5px;">Save</button>
+                <button onclick="cancelNoteEdit(${note.id})" style="background: #718096; padding: 5px 10px; font-size: 0.8rem;">Cancel</button>
+              </div>
+            </div>
+          `).join('')}
+        `;
+      } catch (error) {
+        console.error('Error loading notes:', error);
+      }
+    }
+
+    function editNote(id) {
+      document.getElementById(`note-content-${id}`).style.display = 'none';
+      document.getElementById(`note-edit-${id}`).style.display = 'block';
+    }
+
+    function cancelNoteEdit(id) {
+      document.getElementById(`note-content-${id}`).style.display = 'block';
+      document.getElementById(`note-edit-${id}`).style.display = 'none';
+    }
+
+    async function saveNoteEdit(id) {
+      const content = document.getElementById(`edit-content-${id}`).value;
+      
+      try {
+        const response = await fetch(`/api/notes/${id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ content })
+        });
+        
+        if (response.ok) {
+          loadNotes();
+        }
+      } catch (error) {
+        console.error('Error updating note:', error);
+      }
+    }
+
+    async function deleteNote(id) {
+      if (confirm('Are you sure you want to delete this note?')) {
+        try {
+          await fetch(`/api/notes/${id}`, { method: 'DELETE' });
+          loadNotes();
+        } catch (error) {
+          console.error('Error deleting note:', error);
+        }
+      }
+    }
+  </script>
+</body>
+</html> 

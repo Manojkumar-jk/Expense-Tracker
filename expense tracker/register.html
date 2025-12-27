@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Register</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    body { background: #e6f0fa; }
+    .register-card { max-width: 400px; margin: 80px auto; background: #fff; border-radius: 12px; box-shadow: 0 2px 12px #0001; padding: 32px 24px; }
+    .register-card h2 { text-align: center; margin-bottom: 24px; }
+    .register-card input { width: 100%; margin-bottom: 16px; padding: 10px; border-radius: 6px; border: 1px solid #cbd5e1; }
+    .register-card button { width: 100%; padding: 10px; background: #38a169; color: #fff; border: none; border-radius: 6px; font-size: 1rem; }
+    .register-card .error { color: #e53e3e; margin-bottom: 12px; text-align: center; }
+    .register-card .login-link { display: block; text-align: center; margin-top: 12px; color: #3182ce; }
+  </style>
+</head>
+<body>
+  <div class="register-card">
+    <h2>Register</h2>
+    <form id="registerForm">
+      <input type="text" id="username" placeholder="Username" required>
+      <input type="password" id="password" placeholder="Password" required>
+      <div class="error" id="errorMsg" style="display:none;"></div>
+      <button type="submit">Register</button>
+    </form>
+    <a href="login.html" class="login-link">Already have an account? Login</a>
+  </div>
+  <script>
+    document.getElementById('registerForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const username = document.getElementById('username').value;
+      const password = document.getElementById('password').value;
+      const errorMsg = document.getElementById('errorMsg');
+      errorMsg.style.display = 'none';
+      try {
+        const res = await fetch('/api/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, password })
+        });
+        const data = await res.json();
+        if (res.ok && data.success) {
+          window.location.href = 'login.html';
+        } else {
+          errorMsg.textContent = data.error || 'Registration failed';
+          errorMsg.style.display = 'block';
+        }
+      } catch (err) {
+        errorMsg.textContent = 'Server error';
+        errorMsg.style.display = 'block';
+      }
+    });
+  </script>
+</body>
+</html> 

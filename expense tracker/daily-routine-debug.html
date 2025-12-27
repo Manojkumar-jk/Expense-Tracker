@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Daily Routine Debug - Personal Dashboard</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+    .card {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      margin-bottom: 20px;
+    }
+    .debug-info {
+      background: #e8f4fd;
+      border: 1px solid #bee5eb;
+      padding: 15px;
+      border-radius: 5px;
+      margin-bottom: 20px;
+    }
+    .error {
+      background: #f8d7da;
+      border: 1px solid #f5c6cb;
+      color: #721c24;
+      padding: 10px;
+      border-radius: 5px;
+      margin: 10px 0;
+    }
+    .success {
+      background: #d4edda;
+      border: 1px solid #c3e6cb;
+      color: #155724;
+      padding: 10px;
+      border-radius: 5px;
+      margin: 10px 0;
+    }
+    input, button {
+      padding: 8px 12px;
+      margin: 5px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    }
+    button {
+      background: #007bff;
+      color: white;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #0056b3;
+    }
+    .routine-item {
+      border: 1px solid #ddd;
+      padding: 10px;
+      margin: 5px 0;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Daily Routine Debug Page</h1>
+  
+  <div class="debug-info">
+    <h3>Debug Information</h3>
+    <p>This page will help identify what's not working with the daily routine functionality.</p>
+    <p>Check the browser console (F12) for detailed logs.</p>
+  </div>
+
+  <div class="card">
+    <h2>Test Database Connection</h2>
+    <button onclick="testConnection()">Test API Connection</button>
+    <div id="connectionResult"></div>
+  </div>
+
+  <div class="card">
+    <h2>Add New Routine</h2>
+    <input type="text" id="taskInput" placeholder="Enter task" />
+    <input type="time" id="timeInput" />
+    <button onclick="addRoutine()">Add Routine</button>
+    <div id="addResult"></div>
+  </div>
+
+  <div class="card">
+    <h2>Load Routines</h2>
+    <button onclick="loadRoutines()">Load Routines</button>
+    <div id="loadResult"></div>
+    <div id="routinesList"></div>
+  </div>
+
+  <div class="card">
+    <h2>Console Logs</h2>
+    <div id="consoleLogs" style="background: #f8f9fa; padding: 10px; border-radius: 4px; font-family: monospace; max-height: 300px; overflow-y: auto;"></div>
+  </div>
+
+  <script>
+    // Debug logging function
+    function log(message, type = 'info') {
+      const timestamp = new Date().toLocaleTimeString();
+      const logDiv = document.getElementById('consoleLogs');
+      const logEntry = document.createElement('div');
+      logEntry.style.color = type === 'error' ? 'red' : type === 'success' ? 'green' : 'black';
+      logEntry.textContent = `[${timestamp}] ${message}`;
+      logDiv.appendChild(logEntry);
+      logDiv.scrollTop = logDiv.scrollHeight;
+      
+      // Also log to console
+      console.log(`[${timestamp}] ${message}`);
+    }
+
+    // Test API connection
+    async function testConnection() {
+      log('Testing API connection...');
+      const resultDiv = document.getElementById('connectionResult');
+      
+      try {
+        const response = await fetch('/api/routines');
+        log(`Response status: ${response.status}`);
+        log(`Response ok: ${response.ok}`);
+        
+        if (response.ok) {
+          const data = await response.json();
+          log(`Response data: ${JSON.stringify(data)}`);
+          resultDiv.innerHTML = `<div class="success">✅ Connection successful! Found ${data.routines ? data.routines.length : 0} routines.</div>`;
+        } else {
+          const errorText = await response.text();
+          log(`Error response: ${errorText}`);
+          resultDiv.innerHTML = `<div class="error">❌ Connection failed: ${response.status} ${response.statusText}</div>`;
+        }
+      } catch (error) {
+        log(`Network error: ${error.message}`, 'error');
+        resultDiv.innerHTML = `<div class="error">❌ Network error: ${error.message}</div>`;
+      }
+    }
+
+    // Add routine
+    async function addRoutine() {
+      const task = document.getElementById('taskInput').value.trim();
+      const time = document.getElementById('timeInput').value;
+      const resultDiv = document.getElementById('addResult');
+      
+      if (!task) {
+        resultDiv.innerHTML = '<div class="error">Please enter a task</div>';
+        return;
+      }
+      
+      log(`Adding routine: ${task} at ${time || 'no time'}`);
+      
+      try {
+        const response = await fetch('/api/routines', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ task, time: time || null })
+        });
+        
+        log(`Add response status: ${response.status}`);
+        
+        if (response.ok) {
+          const data = await response.json();
+          log(`Routine added successfully: ${JSON.stringify(data)}`);
+          resultDiv.innerHTML = '<div class="success">✅ Routine added successfully!</div>';
+          document.getElementById('taskInput').value = '';
+          document.getElementById('timeInput').value = '';
+        } else {
+          const errorData = await response.json();
+          log(`Add failed: ${JSON.stringify(errorData)}`, 'error');
+          resultDiv.innerHTML = `<div class="error">❌ Failed to add routine: ${errorData.error || 'Unknown error'}</div>`;
+        }
+      } catch (error) {
+        log(`Add error: ${error.message}`, 'error');
+        resultDiv.innerHTML = `<div class="error">❌ Error: ${error.message}</div>`;
+      }
+    }
+
+    // Load routines
+    async function loadRoutines() {
+      log('Loading routines...');
+      const resultDiv = document.getElementById('loadResult');
+      const listDiv = document.getElementById('routinesList');
+      
+      try {
+        const response = await fetch('/api/routines');
+        log(`Load response status: ${response.status}`);
+        
+        if (response.ok) {
+          const data = await response.json();
+          log(`Loaded routines: ${JSON.stringify(data)}`);
+          
+          if (data.routines && data.routines.length > 0) {
+            resultDiv.innerHTML = `<div class="success">✅ Loaded ${data.routines.length} routines</div>`;
+            
+            listDiv.innerHTML = data.routines.map(routine => `
+              <div class="routine-item">
+                <input type="checkbox" ${routine.completed ? 'checked' : ''} 
+                       onchange="toggleRoutine(${routine.id}, this.checked, '${routine.task}')">
+                <span><strong>${routine.task}</strong></span>
+                ${routine.time ? `<span>⏰ ${routine.time}</span>` : ''}
+                <button onclick="deleteRoutine(${routine.id})">Delete</button>
+              </div>
+            `).join('');
+          } else {
+            resultDiv.innerHTML = '<div class="success">✅ No routines found</div>';
+            listDiv.innerHTML = '<p>No routines available.</p>';
+          }
+        } else {
+          const errorText = await response.text();
+          log(`Load failed: ${errorText}`, 'error');
+          resultDiv.innerHTML = `<div class="error">❌ Failed to load routines: ${response.status}</div>`;
+        }
+      } catch (error) {
+        log(`Load error: ${error.message}`, 'error');
+        resultDiv.innerHTML = `<div class="error">❌ Error: ${error.message}</div>`;
+      }
+    }
+
+    // Toggle routine completion
+    async function toggleRoutine(id, completed, task) {
+      log(`Toggling routine ${id} to ${completed ? 'completed' : 'incomplete'}`);
+      
+      try {
+        const response = await fetch(`/api/routines/${id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ task, completed, time: null })
+        });
+        
+        if (response.ok) {
+          log(`Routine ${id} updated successfully`);
+        } else {
+          const errorData = await response.json();
+          log(`Failed to update routine: ${JSON.stringify(errorData)}`, 'error');
+        }
+      } catch (error) {
+        log(`Toggle error: ${error.message}`, 'error');
+      }
+    }
+
+    // Delete routine
+    async function deleteRoutine(id) {
+      if (confirm('Delete this routine?')) {
+        log(`Deleting routine ${id}`);
+        
+        try {
+          const response = await fetch(`/api/routines/${id}`, { method: 'DELETE' });
+          
+          if (response.ok) {
+            log(`Routine ${id} deleted successfully`);
+            loadRoutines(); // Reload the list
+          } else {
+            const errorData = await response.json();
+            log(`Failed to delete routine: ${JSON.stringify(errorData)}`, 'error');
+          }
+        } catch (error) {
+          log(`Delete error: ${error.message}`, 'error');
+        }
+      }
+    }
+
+    // Auto-load routines on page load
+    window.addEventListener('load', () => {
+      log('Page loaded, testing connection...');
+      testConnection();
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Meal Planner</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <a href="index.html">&larr; Back to Dashboard</a>
+  <div class="card" style="max-width: 800px; margin: 40px auto;">
+    <h2>Meal Planner</h2>
+    
+    <!-- Weekly meal planner -->
+    <div id="mealPlanner">
+      <!-- Meal planner will be loaded here -->
+    </div>
+    
+    <p>Plan your weekly meals here.</p>
+  </div>
+
+  <script>
+    const daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+    const mealTypes = ['breakfast', 'lunch', 'dinner'];
+    
+    // Load meals on page load
+    loadMeals();
+
+    async function loadMeals() {
+      try {
+        const response = await fetch('/api/meals');
+        const data = await response.json();
+        const mealPlanner = document.getElementById('mealPlanner');
+        
+        mealPlanner.innerHTML = `
+          <div style="overflow-x: auto;">
+            <table style="width: 100%; border-collapse: collapse; margin-top: 20px;">
+              <thead>
+                <tr style="background: #f7fafc;">
+                  <th style="padding: 15px; text-align: left; border-bottom: 2px solid #e2e8f0;">Day</th>
+                  <th style="padding: 15px; text-align: left; border-bottom: 2px solid #e2e8f0;">Breakfast</th>
+                  <th style="padding: 15px; text-align: left; border-bottom: 2px solid #e2e8f0;">Lunch</th>
+                  <th style="padding: 15px; text-align: left; border-bottom: 2px solid #e2e8f0;">Dinner</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${daysOfWeek.map(day => `
+                  <tr>
+                    <td style="padding: 15px; font-weight: 600; color: #667eea; border-bottom: 1px solid #e2e8f0;">
+                      ${day}
+                    </td>
+                    ${mealTypes.map(mealType => `
+                      <td style="padding: 15px; border-bottom: 1px solid #e2e8f0;">
+                        <div id="${day.toLowerCase()}-${mealType}-display">
+                          ${data.weeklyMeals[day]?.[mealType] || 'Not planned'}
+                        </div>
+                        <div id="${day.toLowerCase()}-${mealType}-edit" style="display: none;">
+                          <input type="text" id="${day.toLowerCase()}-${mealType}-input" 
+                                 value="${data.weeklyMeals[day]?.[mealType] || ''}" 
+                                 style="width: 100%; margin-bottom: 5px;">
+                          <button onclick="saveMeal('${day}', '${mealType}')" 
+                                  style="background: #38a169; padding: 3px 8px; font-size: 0.7rem; margin-right: 5px;">Save</button>
+                          <button onclick="cancelEdit('${day}', '${mealType}')" 
+                                  style="background: #718096; padding: 3px 8px; font-size: 0.7rem;">Cancel</button>
+                        </div>
+                        <button onclick="editMeal('${day}', '${mealType}')" 
+                                style="background: #3182ce; padding: 3px 8px; font-size: 0.7rem; margin-top: 5px;">Edit</button>
+                      </td>
+                    `).join('')}
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          </div>
+        `;
+      } catch (error) {
+        console.error('Error loading meals:', error);
+      }
+    }
+
+    function editMeal(day, mealType) {
+      document.getElementById(`${day.toLowerCase()}-${mealType}-display`).style.display = 'none';
+      document.getElementById(`${day.toLowerCase()}-${mealType}-edit`).style.display = 'block';
+    }
+
+    function cancelEdit(day, mealType) {
+      document.getElementById(`${day.toLowerCase()}-${mealType}-display`).style.display = 'block';
+      document.getElementById(`${day.toLowerCase()}-${mealType}-edit`).style.display = 'none';
+    }
+
+    async function saveMeal(day, mealType) {
+      const meal = document.getElementById(`${day.toLowerCase()}-${mealType}-input`).value;
+      
+      try {
+        const response = await fetch('/api/meals', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            weeklyMeals: {
+              [day]: {
+                [mealType]: meal
+              }
+            }
+          })
+        });
+        
+        if (response.ok) {
+          loadMeals();
+        }
+      } catch (error) {
+        console.error('Error saving meal:', error);
+      }
+    }
+  </script>
+</body>
+</html> 

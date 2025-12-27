@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Weather</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <a href="index.html">&larr; Back to Dashboard</a>
+  <div class="card" style="max-width: 400px; margin: 40px auto;">
+    <h2>Weather</h2>
+    <div style="font-size: 40px;">⛅</div>
+    <div class="weather-temp" style="font-size: 32px;">72&deg;</div>
+    <div class="weather-location">Sunnyvale</div>
+    <p>Check the latest weather updates here.</p>
+  </div>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const API_KEY = "5f56d525d1619d0a2cd2eac4ce55588e";
+      const city = 'Bengaluru';
+      const url = `https://api.openweathermap.org/data/2.5/weather?q=${city}&units=metric&appid=${API_KEY}`;
+      const card = document.querySelector('.card');
+      const iconDiv = card.querySelector('div[style*="font-size: 40px;"]');
+      const tempDiv = card.querySelector('.weather-temp');
+      const locDiv = card.querySelector('.weather-location');
+      if (iconDiv && tempDiv && locDiv) {
+        fetch(url)
+          .then(res => {
+            if (!res.ok) throw new Error('Weather API error: ' + res.status);
+            return res.json();
+          })
+          .then(data => {
+            if (data && data.main && data.weather) {
+              const temp = Math.round(data.main.temp);
+              const icon = data.weather[0].icon;
+              const description = data.weather[0].main;
+              const weatherIcon = `<img src=\"https://openweathermap.org/img/wn/${icon}@2x.png\" alt=\"${description}\" style=\"vertical-align:middle;width:48px;height:48px;\">`;
+              iconDiv.innerHTML = weatherIcon;
+              tempDiv.innerHTML = temp + '&deg;C';
+              locDiv.textContent = city;
+            } else {
+              iconDiv.textContent = 'N/A';
+              tempDiv.textContent = '--';
+              locDiv.textContent = city;
+            }
+          })
+          .catch(err => {
+            iconDiv.textContent = 'N/A';
+            tempDiv.textContent = '--';
+            locDiv.textContent = city;
+            console.error('Failed to load weather:', err);
+          });
+      }
+    });
+  </script>
+</body>
+</html> 

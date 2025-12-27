@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Expenses - Personal Dashboard</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    body {
+      background: #f7fafc;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 20px;
+    }
+    
+    .back-link {
+      display: inline-block;
+      color: #667eea;
+      text-decoration: none;
+      font-weight: 500;
+      margin-bottom: 20px;
+      transition: color 0.3s ease;
+    }
+    
+    .back-link:hover {
+      color: #5a67d8;
+    }
+    
+    .card {
+      max-width: 800px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      padding: 30px;
+    }
+    
+    .budget-section {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 30px;
+      padding: 20px;
+      background: #f8fafc;
+      border-radius: 8px;
+      border: 1px solid #e2e8f0;
+    }
+    
+    .budget-input-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .budget-input-group label {
+      font-weight: 600;
+      color: #2d3748;
+    }
+    
+    .budget-input-group input {
+      padding: 8px 12px;
+      border: 2px solid #e2e8f0;
+      border-radius: 6px;
+      font-size: 16px;
+      width: 120px;
+      transition: border-color 0.3s ease;
+    }
+    
+    .budget-input-group input:focus {
+      outline: none;
+      border-color: #667eea;
+    }
+    
+    .budget-input-group button {
+      padding: 8px 16px;
+      background: #667eea;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 500;
+      transition: all 0.3s ease;
+    }
+    
+    .budget-input-group button:hover {
+      background: #5a67d8;
+      transform: translateY(-1px);
+    }
+    
+    .current-spent {
+      text-align: right;
+    }
+    
+    .current-spent strong {
+      font-size: 18px;
+      color: #2d3748;
+    }
+    
+    .expenses-bar {
+      width: 100%;
+      height: 12px;
+      background: #e2e8f0;
+      border-radius: 6px;
+      overflow: hidden;
+      margin: 20px 0;
+    }
+    
+    .expenses-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #48bb78, #38a169);
+      transition: width 0.5s ease, background-color 0.3s ease;
+      border-radius: 6px;
+    }
+    
+    .expenses-bar-fill.warning {
+      background: linear-gradient(90deg, #ed8936, #dd6b20);
+    }
+    
+    .expenses-bar-fill.danger {
+      background: linear-gradient(90deg, #f56565, #e53e3e);
+    }
+    
+    .expenses-labels {
+      display: flex;
+      justify-content: space-between;
+      color: #718096;
+      font-size: 14px;
+      margin-bottom: 30px;
+    }
+    
+    .add-expense-form {
+      background: #f8fafc;
+      padding: 20px;
+      border-radius: 8px;
+      border: 1px solid #e2e8f0;
+      margin-bottom: 30px;
+    }
+    
+    .form-row {
+      display: flex;
+      gap: 15px;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+    
+    .form-row input,
+    .form-row select {
+      padding: 10px 12px;
+      border: 2px solid #e2e8f0;
+      border-radius: 6px;
+      font-size: 14px;
+      transition: border-color 0.3s ease;
+    }
+    
+    .form-row input:focus,
+    .form-row select:focus {
+      outline: none;
+      border-color: #667eea;
+    }
+    
+    .form-row button {
+      padding: 10px 20px;
+      background: #48bb78;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 500;
+      transition: all 0.3s ease;
+    }
+    
+    .form-row button:hover {
+      background: #38a169;
+      transform: translateY(-1px);
+    }
+    
+    .expenses-list {
+      margin-top: 20px;
+    }
+    
+    .expenses-list h3 {
+      color: #2d3748;
+      margin-bottom: 15px;
+      border-bottom: 2px solid #e2e8f0;
+      padding-bottom: 10px;
+    }
+    
+    .expense-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 15px;
+      border-bottom: 1px solid #f7fafc;
+      transition: background-color 0.3s ease;
+    }
+    
+    .expense-item:hover {
+      background: #f8fafc;
+    }
+    
+    .expense-info {
+      flex: 1;
+    }
+    
+    .expense-description {
+      font-weight: 600;
+      color: #2d3748;
+      margin-bottom: 5px;
+    }
+    
+    .expense-meta {
+      color: #718096;
+      font-size: 14px;
+    }
+    
+    .expense-amount {
+      font-weight: 600;
+      color: #2d3748;
+      margin-right: 15px;
+    }
+    
+    .delete-btn {
+      padding: 6px 12px;
+      background: #f56565;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 12px;
+      transition: background-color 0.3s ease;
+    }
+    
+    .delete-btn:hover {
+      background: #e53e3e;
+    }
+    
+    .success-message {
+      background: #c6f6d5;
+      color: #22543d;
+      padding: 12px;
+      border-radius: 6px;
+      margin-bottom: 20px;
+      border: 1px solid #9ae6b4;
+      display: none;
+    }
+    
+    .error-message {
+      background: #fed7d7;
+      color: #742a2a;
+      padding: 12px;
+      border-radius: 6px;
+      margin-bottom: 20px;
+      border: 1px solid #feb2b2;
+      display: none;
+    }
+    
+    @media (max-width: 768px) {
+      .budget-section {
+        flex-direction: column;
+        gap: 15px;
+        align-items: stretch;
+      }
+      
+      .budget-input-group {
+        justify-content: center;
+      }
+      
+      .current-spent {
+        text-align: center;
+      }
+      
+      .form-row {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      
+      .form-row input,
+      .form-row select,
+      .form-row button {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <a href="index.html" class="back-link">&larr; Back to Dashboard</a>
+  
+  <div class="card">
+    <h2>Expenses This Month</h2>
+    
+    <!-- Success/Error Messages -->
+    <div id="successMessage" class="success-message"></div>
+    <div id="errorMessage" class="error-message"></div>
+    
+    <!-- Budget and current spent -->
+    <div class="budget-section">
+      <div class="budget-input-group">
+        <label>Monthly Budget: $</label>
+        <input type="number" id="monthlyBudget" value="500" min="1" step="0.01">
+        <button onclick="updateBudget()">Update Budget</button>
+      </div>
+      <div class="current-spent">
+        <strong>Current Spent: $<span id="currentSpent">0</span></strong>
+      </div>
+    </div>
+    
+    <!-- Progress bar -->
+    <div class="expenses-bar">
+      <div id="expensesBarFill" class="expenses-bar-fill" style="width: 0%;"></div>
+    </div>
+    <div class="expenses-labels">
+      <span>$0</span>
+      <span id="budgetDisplay">$500</span>
+    </div>
+    
+    <!-- Add expense form -->
+    <div class="add-expense-form">
+      <h3>Add New Expense</h3>
+      <form id="addExpenseForm">
+        <div class="form-row">
+          <input type="text" id="expenseDescription" placeholder="Description" required style="flex: 2;">
+          <input type="number" id="expenseAmount" placeholder="Amount" step="0.01" min="0.01" required style="flex: 1;">
+          <select id="expenseCategory" style="flex: 1;">
+            <option value="Food">Food</option>
+            <option value="Transport">Transport</option>
+            <option value="Entertainment">Entertainment</option>
+            <option value="Shopping">Shopping</option>
+            <option value="Bills">Bills</option>
+            <option value="Other">Other</option>
+          </select>
+          <button type="submit">Add Expense</button>
+        </div>
+      </form>
+    </div>
+    
+    <!-- Expenses list -->
+    <div id="expensesList" class="expenses-list">
+      <!-- Expenses will be loaded here -->
+    </div>
+  </div>
+
+  <script>
+    // Load expenses on page load
+    loadExpenses();
+
+    // Add expense form handler
+    document.getElementById('addExpenseForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const description = document.getElementById('expenseDescription').value;
+      const amount = parseFloat(document.getElementById('expenseAmount').value);
+      const category = document.getElementById('expenseCategory').value;
+      
+      try {
+        const response = await fetch('/api/expenses', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ description, amount, category })
+        });
+        
+        if (response.ok) {
+          document.getElementById('expenseDescription').value = '';
+          document.getElementById('expenseAmount').value = '';
+          showMessage('success', 'Expense added successfully!');
+          loadExpenses();
+        } else {
+          const errorData = await response.json();
+          showMessage('error', errorData.error || 'Failed to add expense');
+        }
+      } catch (error) {
+        console.error('Error adding expense:', error);
+        showMessage('error', 'Failed to add expense. Please try again.');
+      }
+    });
+
+    async function loadExpenses() {
+      try {
+        const response = await fetch('/api/expenses');
+        if (!response.ok) {
+          throw new Error('Failed to fetch expenses');
+        }
+        
+        const data = await response.json();
+        
+        // Update budget display
+        document.getElementById('monthlyBudget').value = data.monthlyBudget;
+        document.getElementById('budgetDisplay').textContent = `$${data.monthlyBudget}`;
+        document.getElementById('currentSpent').textContent = data.currentSpent.toFixed(2);
+        
+        // Update progress bar
+        const percentage = (data.currentSpent / data.monthlyBudget) * 100;
+        const progressBar = document.getElementById('expensesBarFill');
+        progressBar.style.width = Math.min(percentage, 100) + '%';
+        
+        // Update progress bar color based on spending
+        progressBar.classList.remove('warning', 'danger');
+        if (percentage >= 90) {
+          progressBar.classList.add('danger');
+        } else if (percentage >= 70) {
+          progressBar.classList.add('warning');
+        }
+        
+        // Update expenses list
+        const expensesList = document.getElementById('expensesList');
+        if (data.expenses.length === 0) {
+          expensesList.innerHTML = '<h3>Recent Expenses</h3><p style="text-align: center; color: #718096; font-style: italic;">No expenses added yet.</p>';
+        } else {
+          expensesList.innerHTML = `
+            <h3>Recent Expenses</h3>
+            ${data.expenses.map(expense => `
+              <div class="expense-item">
+                <div class="expense-info">
+                  <div class="expense-description">${expense.description}</div>
+                  <div class="expense-meta">${expense.category} • ${expense.date || 'No date'}</div>
+                </div>
+                <div style="display: flex; align-items: center;">
+                  <span class="expense-amount">$${parseFloat(expense.amount).toFixed(2)}</span>
+                  <button onclick="deleteExpense(${expense.id})" class="delete-btn">Delete</button>
+                </div>
+              </div>
+            `).join('')}
+          `;
+        }
+      } catch (error) {
+        console.error('Error loading expenses:', error);
+        showMessage('error', 'Failed to load expenses. Please refresh the page.');
+      }
+    }
+
+    async function updateBudget() {
+      const newBudget = parseFloat(document.getElementById('monthlyBudget').value);
+      
+      if (!newBudget || newBudget <= 0) {
+        showMessage('error', 'Please enter a valid budget amount');
+        return;
+      }
+      
+      try {
+        const response = await fetch('/api/budget', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ monthlyBudget: newBudget })
+        });
+        
+        if (response.ok) {
+          showMessage('success', 'Budget updated successfully!');
+          loadExpenses();
+        } else {
+          const errorData = await response.json();
+          showMessage('error', errorData.error || 'Failed to update budget');
+        }
+      } catch (error) {
+        console.error('Error updating budget:', error);
+        showMessage('error', 'Failed to update budget. Please try again.');
+      }
+    }
+
+    async function deleteExpense(id) {
+      if (confirm('Are you sure you want to delete this expense?')) {
+        try {
+          const response = await fetch(`/api/expenses/${id}`, { method: 'DELETE' });
+          
+          if (response.ok) {
+            showMessage('success', 'Expense deleted successfully!');
+            loadExpenses();
+          } else {
+            const errorData = await response.json();
+            showMessage('error', errorData.error || 'Failed to delete expense');
+          }
+        } catch (error) {
+          console.error('Error deleting expense:', error);
+          showMessage('error', 'Failed to delete expense. Please try again.');
+        }
+      }
+    }
+
+    function showMessage(type, message) {
+      const successMsg = document.getElementById('successMessage');
+      const errorMsg = document.getElementById('errorMessage');
+      
+      if (type === 'success') {
+        successMsg.textContent = message;
+        successMsg.style.display = 'block';
+        errorMsg.style.display = 'none';
+        
+        setTimeout(() => {
+          successMsg.style.display = 'none';
+        }, 5000);
+      } else {
+        errorMsg.textContent = message;
+        errorMsg.style.display = 'block';
+        successMsg.style.display = 'none';
+        
+        setTimeout(() => {
+          errorMsg.style.display = 'none';
+        }, 5000);
+      }
+    }
+  </script>
+</body>
+</html> 

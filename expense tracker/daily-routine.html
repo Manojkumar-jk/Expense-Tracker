@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Daily Routine - Personal Dashboard</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    body {
+      background: #f7fafc;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 20px;
+    }
+    
+    .back-link {
+      display: inline-block;
+      color: #667eea;
+      text-decoration: none;
+      font-weight: 500;
+      margin-bottom: 20px;
+      transition: color 0.3s ease;
+    }
+    
+    .back-link:hover {
+      color: #5a67d8;
+    }
+    
+    .card {
+      max-width: 600px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      padding: 30px;
+    }
+    
+    .add-routine-form {
+      background: #f8fafc;
+      padding: 20px;
+      border-radius: 8px;
+      border: 1px solid #e2e8f0;
+      margin-bottom: 30px;
+    }
+    
+    .form-row {
+      display: flex;
+      gap: 15px;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+    
+    .form-row input {
+      padding: 10px 12px;
+      border: 2px solid #e2e8f0;
+      border-radius: 6px;
+      font-size: 14px;
+      transition: border-color 0.3s ease;
+    }
+    
+    .form-row input:focus {
+      outline: none;
+      border-color: #667eea;
+    }
+    
+    .form-row button {
+      padding: 10px 20px;
+      background: #48bb78;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 500;
+      transition: all 0.3s ease;
+    }
+    
+    .form-row button:hover {
+      background: #38a169;
+      transform: translateY(-1px);
+    }
+    
+    .routine-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    
+    .routine-list h3 {
+      color: #2d3748;
+      margin-bottom: 15px;
+      border-bottom: 2px solid #e2e8f0;
+      padding-bottom: 10px;
+    }
+    
+    .routine-item {
+      display: flex;
+      align-items: center;
+      padding: 15px;
+      border-bottom: 1px solid #f7fafc;
+      transition: background-color 0.3s ease;
+      gap: 15px;
+    }
+    
+    .routine-item:hover {
+      background: #f8fafc;
+    }
+    
+    .routine-checkbox {
+      width: 18px;
+      height: 18px;
+      cursor: pointer;
+      accent-color: #48bb78;
+    }
+    
+    .routine-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+    
+    .routine-task {
+      font-weight: 600;
+      color: #2d3748;
+      font-size: 16px;
+    }
+    
+    .routine-time {
+      color: #718096;
+      font-size: 14px;
+    }
+    
+    .routine-actions {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+    
+    .edit-btn {
+      padding: 6px 12px;
+      background: #667eea;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 12px;
+      transition: background-color 0.3s ease;
+    }
+    
+    .edit-btn:hover {
+      background: #5a67d8;
+    }
+    
+    .delete-btn {
+      padding: 6px 12px;
+      background: #f56565;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 12px;
+      transition: background-color 0.3s ease;
+    }
+    
+    .delete-btn:hover {
+      background: #e53e3e;
+    }
+    
+    .success-message {
+      background: #c6f6d5;
+      color: #22543d;
+      padding: 12px;
+      border-radius: 6px;
+      margin-bottom: 20px;
+      border: 1px solid #9ae6b4;
+      display: none;
+    }
+    
+    .error-message {
+      background: #fed7d7;
+      color: #742a2a;
+      padding: 12px;
+      border-radius: 6px;
+      margin-bottom: 20px;
+      border: 1px solid #feb2b2;
+      display: none;
+    }
+    
+    .empty-state {
+      text-align: center;
+      color: #718096;
+      font-style: italic;
+      padding: 40px 20px;
+    }
+    
+    .completed {
+      opacity: 0.6;
+    }
+    
+    .completed .routine-task {
+      text-decoration: line-through;
+      color: #718096;
+    }
+    
+    @media (max-width: 768px) {
+      .form-row {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      
+      .form-row input,
+      .form-row button {
+        width: 100%;
+      }
+      
+      .routine-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+      }
+      
+      .routine-actions {
+        width: 100%;
+        justify-content: space-between;
+      }
+    }
+  </style>
+</head>
+<body>
+  <a href="index.html" class="back-link">&larr; Back to Dashboard</a>
+  
+  <div class="card">
+    <h2>Daily Routine</h2>
+    
+    <!-- Success/Error Messages -->
+    <div id="successMessage" class="success-message"></div>
+    <div id="errorMessage" class="error-message"></div>
+    
+    <!-- Add new routine form -->
+    <div class="add-routine-form">
+      <h3>Add New Routine</h3>
+      <form id="addRoutineForm">
+        <div class="form-row">
+          <input type="text" id="routineTask" placeholder="Enter routine task" required style="flex: 2;">
+          <input type="time" id="routineTime" style="flex: 1;">
+          <button type="submit">Add Routine</button>
+        </div>
+      </form>
+    </div>
+    
+    <!-- Routines list -->
+    <div id="routineList" class="routine-list">
+      <!-- Routines will be loaded here -->
+    </div>
+  </div>
+
+  <script>
+    // Load routines on page load
+    loadRoutines();
+
+    // Add routine form handler
+    document.getElementById('addRoutineForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const task = document.getElementById('routineTask').value.trim();
+      const time = document.getElementById('routineTime').value;
+      
+      if (!task) {
+        showMessage('error', 'Please enter a routine task');
+        return;
+      }
+      
+      try {
+        const response = await fetch('/api/routines', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ task, time: time || null })
+        });
+        
+        if (response.ok) {
+          document.getElementById('routineTask').value = '';
+          document.getElementById('routineTime').value = '';
+          showMessage('success', 'Routine added successfully!');
+          loadRoutines();
+        } else {
+          const errorData = await response.json();
+          showMessage('error', errorData.error || 'Failed to add routine');
+        }
+      } catch (error) {
+        console.error('Error adding routine:', error);
+        showMessage('error', 'Failed to add routine. Please try again.');
+      }
+    });
+
+    async function loadRoutines() {
+      try {
+        const response = await fetch('/api/routines');
+        if (!response.ok) {
+          throw new Error('Failed to fetch routines');
+        }
+        
+        const data = await response.json();
+        const routineList = document.getElementById('routineList');
+        
+        if (!data.routines || data.routines.length === 0) {
+          routineList.innerHTML = '<div class="empty-state"><h3>No Routines Yet</h3><p>Add your first daily routine to get started!</p></div>';
+        } else {
+          routineList.innerHTML = `
+            <h3>Your Daily Routines</h3>
+            ${data.routines.map(routine => `
+              <div class="routine-item ${routine.completed ? 'completed' : ''}" data-id="${routine.id}">
+                <input type="checkbox" class="routine-checkbox" 
+                       ${routine.completed ? 'checked' : ''} 
+                       onchange="toggleRoutine(${routine.id}, this.checked, '${routine.task}')">
+                <div class="routine-content">
+                  <div class="routine-task">${routine.task}</div>
+                  ${routine.time ? `<div class="routine-time">⏰ ${routine.time}</div>` : ''}
+                </div>
+                <div class="routine-actions">
+                  <button onclick="editRoutine(${routine.id}, '${routine.task}', '${routine.time || ''}')" class="edit-btn">Edit</button>
+                  <button onclick="deleteRoutine(${routine.id})" class="delete-btn">Delete</button>
+                </div>
+              </div>
+            `).join('')}
+          `;
+        }
+      } catch (error) {
+        console.error('Error loading routines:', error);
+        showMessage('error', 'Failed to load routines. Please refresh the page.');
+      }
+    }
+
+    async function toggleRoutine(id, completed, task) {
+      try {
+        const response = await fetch(`/api/routines/${id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ 
+            task: task, 
+            completed: completed,
+            time: getRoutineTime(id)
+          })
+        });
+        
+        if (response.ok) {
+          // Update the UI immediately
+          const routineItem = document.querySelector(`[data-id="${id}"]`);
+          if (routineItem) {
+            if (completed) {
+              routineItem.classList.add('completed');
+            } else {
+              routineItem.classList.remove('completed');
+            }
+          }
+          showMessage('success', completed ? 'Routine marked as completed!' : 'Routine marked as incomplete!');
+        } else {
+          const errorData = await response.json();
+          showMessage('error', errorData.error || 'Failed to update routine');
+          // Revert the checkbox if update failed
+          loadRoutines();
+        }
+      } catch (error) {
+        console.error('Error updating routine:', error);
+        showMessage('error', 'Failed to update routine. Please try again.');
+        // Revert the checkbox if update failed
+        loadRoutines();
+      }
+    }
+
+    function getRoutineTime(id) {
+      const routineItem = document.querySelector(`[data-id="${id}"]`);
+      if (routineItem) {
+        const timeElement = routineItem.querySelector('.routine-time');
+        if (timeElement && timeElement.textContent.includes('⏰')) {
+          return timeElement.textContent.replace('⏰ ', '');
+        }
+      }
+      return '';
+    }
+
+    function editRoutine(id, currentTask, currentTime) {
+      const newTask = prompt('Edit routine task:', currentTask);
+      if (newTask && newTask.trim() !== '') {
+        const newTime = prompt('Edit routine time (HH:MM or leave empty):', currentTime);
+        updateRoutine(id, newTask.trim(), newTime);
+      }
+    }
+
+    async function updateRoutine(id, task, time) {
+      try {
+        const response = await fetch(`/api/routines/${id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ 
+            task: task, 
+            completed: getRoutineCompleted(id),
+            time: time || null
+          })
+        });
+        
+        if (response.ok) {
+          showMessage('success', 'Routine updated successfully!');
+          loadRoutines();
+        } else {
+          const errorData = await response.json();
+          showMessage('error', errorData.error || 'Failed to update routine');
+        }
+      } catch (error) {
+        console.error('Error updating routine:', error);
+        showMessage('error', 'Failed to update routine. Please try again.');
+      }
+    }
+
+    function getRoutineCompleted(id) {
+      const routineItem = document.querySelector(`[data-id="${id}"]`);
+      if (routineItem) {
+        const checkbox = routineItem.querySelector('.routine-checkbox');
+        return checkbox ? checkbox.checked : false;
+      }
+      return false;
+    }
+
+    async function deleteRoutine(id) {
+      if (confirm('Are you sure you want to delete this routine?')) {
+        try {
+          const response = await fetch(`/api/routines/${id}`, { method: 'DELETE' });
+          
+          if (response.ok) {
+            showMessage('success', 'Routine deleted successfully!');
+            loadRoutines();
+          } else {
+            const errorData = await response.json();
+            showMessage('error', errorData.error || 'Failed to delete routine');
+          }
+        } catch (error) {
+          console.error('Error deleting routine:', error);
+          showMessage('error', 'Failed to delete routine. Please try again.');
+        }
+      }
+    }
+
+    function showMessage(type, message) {
+      const successMsg = document.getElementById('successMessage');
+      const errorMsg = document.getElementById('errorMessage');
+      
+      if (type === 'success') {
+        successMsg.textContent = message;
+        successMsg.style.display = 'block';
+        errorMsg.style.display = 'none';
+        
+        setTimeout(() => {
+          successMsg.style.display = 'none';
+        }, 5000);
+      } else {
+        errorMsg.textContent = message;
+        errorMsg.style.display = 'block';
+        successMsg.style.display = 'none';
+        
+        setTimeout(() => {
+          errorMsg.style.display = 'none';
+        }, 5000);
+      }
+    }
+  </script>
+</body>
+</html> 
